@@ -9,7 +9,8 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public UserData userData;
 
-    private string currentUserId;
+    public string currentUserId;
+
     private string GetUserPath(string id) =>
         Path.Combine(Application.persistentDataPath, $"{id}.json");
 
