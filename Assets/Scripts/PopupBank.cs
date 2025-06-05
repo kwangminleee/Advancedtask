@@ -69,6 +69,7 @@ public class PopupBank : MonoBehaviour
             {
                 GameManager.Instance.userData.balance += value;
                 GameManager.Instance.userData.cash -= value;
+                GameManager.Instance.SaveUserData();
             }
             uiManager.Refresh();
         }
@@ -103,6 +104,7 @@ public class PopupBank : MonoBehaviour
             {
                 GameManager.Instance.userData.balance -= value;
                 GameManager.Instance.userData.cash += value;
+                GameManager.Instance.SaveUserData();
             }
             uiManager.Refresh();
         }
