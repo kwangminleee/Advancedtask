@@ -1,4 +1,7 @@
-﻿using System.IO;
+﻿using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class GameManager : MonoBehaviour
@@ -6,7 +9,9 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
     public UserData userData;
 
-    private string savePath;
+    private string currentUserId;
+    private string GetUserPath(string id) =>
+        Path.Combine(Application.persistentDataPath, $"{id}.json");
 
     private void Awake()
     {
@@ -14,8 +19,6 @@ public class GameManager : MonoBehaviour
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
-            savePath = Path.Combine(Application.persistentDataPath, "UserData.json");
-            LoadUserData();
         }
         else
         {
@@ -23,24 +26,78 @@ public class GameManager : MonoBehaviour
             return;
         }
     }
+    public bool IsUserExist(string id)
+    {
+        return File.Exists(GetUserPath(id));
+    }
 
+    public void RegisterUser(string id, string password, string name)
+    {
+        userData = new UserData(id, password, name, 1000000, 5000000);
+        currentUserId = id;
+        SaveUserData();
+    }
+
+    public bool LoginUser(string id, string password)
+    {
+        if (IsUserExist(id))
+        {
+            string path = GetUserPath(id);
+            string json = File.ReadAllText(path);
+            var loadedData = JsonUtility.FromJson<UserData>(json);
+
+            if (loadedData.password == password)
+            {
+                userData = loadedData;
+                currentUserId = id;
+                return true;
+            }
+        }
+        return false;
+    }
     public void SaveUserData()
     {
-        string json = JsonUtility.ToJson(userData, true);
-        File.WriteAllText(savePath, json);
+        if (userData != null && !string.IsNullOrEmpty(currentUserId))
+        {
+            string json = JsonUtility.ToJson(userData, true);
+            File.WriteAllText(GetUserPath(currentUserId), json);
+        }
+
+        //PlayerPrefs.SetString("Name", userData.name);
+        //PlayerPrefs.SetString("Cash", userData.cash.ToString());
+        //PlayerPrefs.SetString("Balance", userData.balance.ToString());
     }
 
-    public void LoadUserData()
+    public void Logout()
     {
-        if (File.Exists(savePath))
-        {
-            string json = File.ReadAllText(savePath);
-            userData = JsonUtility.FromJson<UserData>(json);
-        }
-        else
-        {
-            userData = new UserData("Player", 100000, 50000);
-            SaveUserData();
-        }
+        userData = null;
+        currentUserId = null;
     }
+
+    //public void LoadUserData()
+    //{
+    //    if (File.Exists(savePath))
+    //    {
+    //        string json = File.ReadAllText(savePath);
+    //        userData = JsonUtility.FromJson<UserData>(json);
+    //    }
+    //    else
+    //    {
+    //        userData = new UserData("이광민", 100000, 50000, "1234", "1234");
+    //        SaveUserData();
+    //    }
+
+    //    //if (PlayerPrefs.HasKey("Name"))
+    //    //{
+    //    //    userData = new UserData();
+    //    //    userData.name = PlayerPrefs.GetString("Name");
+    //    //    userData.cash = ulong.Parse(PlayerPrefs.GetString("Cash"));
+    //    //    userData.balance = ulong.Parse(PlayerPrefs.GetString("Balance"));
+    //    //}
+    //    //else
+    //    //{
+    //    //    userData = new UserData("이광민", 100000, 50000);
+    //    //    SaveUserData();
+    //    //}
+    //}
 }

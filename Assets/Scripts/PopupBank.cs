@@ -75,7 +75,7 @@ public class PopupBank : MonoBehaviour
         }
     }
 
-    public void WithdrwaButton()
+    public void WithdrawButton()
     {
         if (ulong.TryParse(withdrawInputField.text, out ulong withdrawAmount))
         {
